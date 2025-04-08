@@ -1,0 +1,109 @@
+<aura:component controller="CustomCheckoutController" implements="forceCommunity:availableForAllPageTypes">
+    <aura:handler name="init" value="{!this}" action="{!c.connectedCallback}"/>
+    <aura:attribute name="authorizationUrl" type="String" default=""/>
+    <aura:attribute name="salesOrderId" type="String" default=""/>
+    <aura:attribute name="cardNumber" type="String" default=""/>
+    <aura:attribute name="expMonth" type="String" default="1"/>
+    <aura:attribute name="expYear" type="String" default="2025"/>
+    <aura:attribute name="cvv" type="String" default="111"/>
+    <aura:attribute name="postalCode" type="String" default="90210"/>
+    <aura:attribute name="country" type="String" default="US"/>
+    <aura:attribute name="saveCard" type="Boolean" default="false"/>
+    <aura:attribute name="selectedPaymentMethod" type="String" default=""/>
+    <aura:attribute name="savedPaymentMethodsOptions" type="List" default="[]"/>
+    <aura:attribute name="isLoading" type="Boolean" default="true"/>
+
+    <lightning:card title="Checkout">
+        <aura:set attribute="actions">
+            <div class="slds-p-horizontal_small">
+                <lightning:button label="Generate Test Order"
+                                  onclick="{!c.handleGenerateTestOrderClick}"/>
+            </div>
+        </aura:set>
+        <FontevaPay:customCheckoutStripeHandler authUrl="{!v.authorizationUrl}"
+                                                onpaymentauthorization="{!c.handleAuth}"/>
+        <aura:if isTrue="{!not(v.isLoading)}">
+            <lightning:layout multipleRows="true" class="slds-p-bottom_medium">
+                <aura:if isTrue="{!v.savedPaymentMethodsOptions}">
+                    <lightning:layoutItem flexibility="auto" size="12" padding="around-small">
+                        <lightning:combobox
+                            name="selectedPaymentMethod"
+                            label="Saved Payment Methods"
+                            value="{!v.selectedPaymentMethod}"
+                            options="{!v.savedPaymentMethodsOptions}"
+                            onchange="{!c.handleInputChange}"/>
+                    </lightning:layoutItem>
+                </aura:if>
+            </lightning:layout>
+            <lightning:layout multipleRows="true">
+                <lightning:layoutItem flexibility="auto" size="12" padding="horizontal-small">
+                    <lightning:input label="Sales Order Id" aura:id="sales-order-id" name="salesOrderId"
+                                     value="{!v.salesOrderId}"
+                                     type="text" onchange="{!c.handleInputChange}"/>
+                </lightning:layoutItem>
+                <aura:if isTrue="{!empty(v.selectedPaymentMethod)}">
+                    <lightning:layoutItem flexibility="auto" size="12" padding="horizontal-small">
+                        <lightning:input label="Card Number" aura:id="card-number" name="cardNumber"
+                                         value="{!v.cardNumber}"
+                                         type="text"
+                                         onchange="{!c.handleInputChange}"/>
+                    </lightning:layoutItem>
+                    <lightning:layoutItem flexibility="auto" size="12">
+                        <lightning:layout multipleRows="true">
+                            <lightning:layoutItem flexibility="auto" size="4" padding="horizontal-small"
+                                                  smallDeviceSize="6"
+                                                  mediumDeviceSize="4">
+                                <lightning:input label="Expiration Month" aura:id="expiration-month" name="expMonth"
+                                                 value="{!v.expMonth}"
+                                                 onchange="{!c.handleInputChange}"/>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem flexibility="auto" size="4" padding="horizontal-small"
+                                                  smallDeviceSize="6"
+                                                  mediumDeviceSize="4">
+                                <lightning:input label="Expiration Year" aura:id="expiration-year" name="expYear"
+                                                 value="{!v.expYear}"
+                                                 type="number"
+                                                 onchange="{!c.handleInputChange}"/>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem flexibility="auto" size="4" padding="horizontal-small"
+                                                  smallDeviceSize="12"
+                                                  mediumDeviceSize="4">
+                                <lightning:input label="CVV" aura:id="cvv" name="cvv" value="{!v.cvv}" type="text"
+                                                 onchange="{!c.handleInputChange}"/>
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                    </lightning:layoutItem>
+                    <lightning:layoutItem flexibility="auto" size="12">
+                        <lightning:layout multipleRows="true">
+                            <lightning:layoutItem flexibility="auto" size="6" padding="horizontal-small">
+                                <lightning:input label="Postal Code" aura:id="postal-code" name="postalCode"
+                                                 value="{!v.postalCode}"
+                                                 type="text"
+                                                 onchange="{!c.handleInputChange}"/>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem flexibility="auto" size="6" padding="horizontal-small">
+                                <lightning:input label="Country" aura:id="country" name="country" value="{!v.country}"
+                                                 type="text"
+                                                 onchange="{!c.handleInputChange}"/>
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem flexibility="auto" size="12" padding="around-small"
+                                          class="slds-text-align_right">
+                        <lightning:input type="checkbox" label="Save for future use" aura:id="save-card" name="saveCard"
+                                         checked="{!v.saveCard}"
+                                         onchange="{!c.handleInputChange}"/>
+                    </lightning:layoutItem>
+                </aura:if>
+                <lightning:layoutItem flexibility="auto" size="12" padding="around-small">
+                    <button type="button"
+                            class="slds-button slds-button_brand slds-button_stretch"
+                            onclick="{!c.handleCheckout}">Pay
+                    </button>
+                </lightning:layoutItem>
+            </lightning:layout>
+        </aura:if>
+        <lightning:spinner aura:id="spinner" variant="brand" class="{!if(v.isLoading, 'slds-show', 'slds-hide')}"/>
+    </lightning:card>
+</aura:component>
